@@ -1,9 +1,10 @@
-import { Table, Card, DatePicker, Space } from 'antd'
+import { Table, Card, DatePicker, Space, Button } from 'antd'
 import React, { useState, useEffect } from 'react'
 import type { DatePickerProps } from 'antd'
 import dayjs from 'dayjs'
 import { source } from './dict'
 import { aiPrefix } from '../../fetch/env'
+import { exportToExcel } from '@/hook/useExcel'
 
 interface SourceItem {
   code: string;
@@ -16,6 +17,8 @@ function getDate() {
   const day = now.getDate().toString().padStart(2, '0')
   return `${year}-${month}-${day}`
 }
+
+let selectedRow:any = []
 function App(props:any) {
   const [loading, setLoading] = useState(false)
   const [dataSource, setDataSource] = useState([])
@@ -76,7 +79,7 @@ function App(props:any) {
     },
     {
       title: '操作',
-      width: 80,
+      width: 120,
       key: 'action',
       fixed: 'right',
       render: (_: any, record: any) => (
@@ -131,7 +134,21 @@ function App(props:any) {
   const handleChatMessages = (record: any) => {
     props.handleChatMessages(record)
   }
-
+  const handleExport = () => {
+    const data = selectedRow.map((i:any) => {
+      return {
+        '场景需求': source.find((p: any) => p.code === i.source)?.name,
+        '现网输入示例': i.finalSendToAi,
+        '现网输出示例': i.aiResultMsg
+      }
+    })
+    exportToExcel(data, 'log')
+  }
+  const rowSelection = {
+    onChange: (e:any, e2:any) => {
+      selectedRow = e2
+    }
+  }
   useEffect(() => {
     loadData(date)
   }, [])
@@ -142,12 +159,21 @@ function App(props:any) {
         defaultValue={dayjs(date, 'YYYY-MM-DD')} format={'YYYY-MM-DD'}
         onChange={onDateChange}
       />
+      <Button
+        className='ml-4'
+        onClick={handleExport}
+      >
+        导出
+      </Button>
       <Table
         loading={loading}
         scroll={{ x: 1000 }}
         dataSource={dataSource}
         // @ts-ignore
         columns={columns}
+        rowSelection={
+          rowSelection
+        }
         rowKey={'id'}
         pagination={tableParams.pagination}
         onChange={handleTableChange}

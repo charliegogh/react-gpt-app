@@ -31,5 +31,5 @@ export const dmOptions = [
   //   code: 'CozeClient'
   // }
 ]
-export const dmParams = getURLParams('dm') || '3'
+export const dmParams = getURLParams('dm') || '0'
 

@@ -12,7 +12,7 @@ function App() {
     <div className='w-full h-[100vh] flex flex-col'>
       <NavBar/>
       <Row className='flex-1 overflow-auto h-full'>
-        <Col span={14}
+        <Col span={16}
           className='h-full flex'
         >
           <div className='flex-1 overflow-auto'>
@@ -21,7 +21,7 @@ function App() {
             />
           </div>
         </Col>
-        <Col span={10}
+        <Col span={8}
           className='h-full flex'
         >
           <div className='flex-1 overflow-auto'>

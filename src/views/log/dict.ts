@@ -49,5 +49,7 @@ export const source = [
   { code: 'readQuestionAnswerYw', name: '单篇阅读-渐进式阅读疑问' },
   { code: 'readQuestionAnswerSdQuestions', name: '单篇阅读-渐进式阅读深度问题' },
   { code: 'readQuestionAnswerZsxd', name: '单篇阅读-渐进式阅读知识习得' },
-  { code: 'readQuestionAnswerHuaci', name: '单篇阅读划选操作' }
+  { code: 'readQuestionAnswerHuaci', name: '单篇阅读划选操作' },
+  { code: 'xaiFullLibraryQA', name: '全库问答' },
+  { code: 'xaiFreeConversation', name: '自由问答' }
 ]
