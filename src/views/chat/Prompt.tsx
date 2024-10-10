@@ -27,28 +27,7 @@ const ChatComponent = (props:any, ref:any) => {
   }
 
   const handleChatMessages = (record: any) => {
-    const finalSendToAi = JSON.parse(record.finalSendToAi)
-    const ask = finalSendToAi.prompt || finalSendToAi.question || finalSendToAi.messages[0].content
-    const data = [
-      {
-        id: record.id,
-        role: 'user',
-        content: ask,
-        loading: false
-      },
-      {
-        id: record.id + '_assistant',
-        role: 'assistant',
-        content: record.aiResultMsg || ' ',
-        ask,
-        loading: false,
-        reloadParams: {
-          ...record,
-          date: getDate()
-        }
-      }
-    ]
-    chat.handleMessages(data, true)
+    chat.handleChat()
     chat.resetScrollPosition()
   }
 

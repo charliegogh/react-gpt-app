@@ -5,36 +5,32 @@ interface ChatMessage {
   id: string | number;
   role: string;
   content: string;
+  ask?: string;
   loading?: boolean;
-  reloadParams?: any | object;
 }
 
 class Chat extends client {
   public chatMessages: ChatMessage[]
+  public chatSession: []
   private currentChatMessageId: string | number
   private field: HTMLInputElement | HTMLTextAreaElement | null
   private sendBtn: HTMLInputElement | HTMLTextAreaElement | null
   private inputValue: string
-  private events: string[]
   public onMessagesChanged: (messages: ChatMessage[]) => void
   private $onCallback: (e: any) => void
 
   constructor(options: any) {
     super()
     this.currentChatMessageId = '1'
-    this.chatMessages = [
-      {
-        id: '1',
-        role: 'system',
-        content: '请点击查看',
-        loading: false
-      }
-    ]
+    this.chatMessages = []
+    this.chatSession = []
+
     this.$onCallback = this._$on
     this.inputValue = options?.inputValue || ''
 
     this.field = options?.field || null
     this.sendBtn = options?.sendBtn || null
+
     this.onMessagesChanged = options?.onMessagesChanged || (() => {
     })
 
@@ -45,46 +41,37 @@ class Chat extends client {
         const target = e.target as HTMLInputElement
         this.inputValue = target.value
       })
-      this.field.addEventListener('keydown', (e: any) => {
+      this.field.addEventListener('keydown', async(e: any) => {
         if (e.keyCode === 13) {
           e.preventDefault()
-          this.dispatchEvent('send')
+          await this.handleEvent()
         }
       })
     }
 
     if (this.sendBtn) {
-      this.sendBtn.addEventListener('click', () => {
-        this.dispatchEvent('send')
+      this.sendBtn.addEventListener('click', async() => {
+        await this.handleEvent()
       })
     }
-
-    this.events = [
-      'send'
-    ]
-    for (let i = 0, len = this.events.length; i < len; i++) {
-      window.addEventListener(this.events[i], this.handleEvent)
-    }
-  }
-
-  dispatchEvent(type: string) {
-    const event = document.createEvent('CustomEvent')
-    event.initCustomEvent(`${type}`, true, true, {
-      type
-    })
-    return window.dispatchEvent(event)
   }
 
   async handleEvent() {
+    // @ts-ignore
+    if (this.status === 'ttsing') {
+      return
+    }
     if ((this.inputValue ?? '') === '') {
       return
     }
-    await this.handleChat()
+    this.handleChat()
     this.resetField()
   }
 
   async handleChat() {
     const id = new Date().getTime()
+    this.currentChatMessageId = id
+
     const chat: ChatMessage[] = [
       {
         id: id + '_user',
@@ -96,10 +83,10 @@ class Chat extends client {
         id: id,
         role: 'assistant',
         content: '',
+        ask: this.inputValue,
         loading: true
       }
     ]
-    this.currentChatMessageId = id
     this.handleMessages(chat)
     await this._$emit()
   }
@@ -110,50 +97,11 @@ class Chat extends client {
     await this.$emit(this.chatMessages.filter(_ => !_.loading))
     this.resetScrollPosition(false, 'chat')
   }
-  async handleChatReloadHz(id: any) {
-    const targetMessage: any = this.chatMessages.find(_ => _.id === id)
-    this.inputValue = targetMessage.ask
-    const _id = new Date().getTime()
-    const chat = [
-      {
-        id: _id + '_user',
-        role: 'user',
-        content: this.inputValue,
-        reloadParams: targetMessage.reloadParams
-      },
-      {
-        id: _id,
-        role: 'assistant',
-        content: '',
-        loading: true,
-        ask: targetMessage.ask,
-        reloadParams: targetMessage.reloadParams
-      }
-    ]
-    this.currentChatMessageId = _id
-    this.handleMessages(chat)
-    await this._$emit()
-  }
 
   async handleChatReload(id: any) {
     const targetMessage: any = this.chatMessages.find(_ => _.id === id)
-    const _id = new Date().getTime()
-    const chat = [
-      {
-        id: _id + '_user',
-        role: 'user',
-        content: targetMessage.content
-      },
-      {
-        id: _id,
-        role: 'assistant',
-        content: '',
-        loading: true
-      }
-    ]
-    this.currentChatMessageId = _id
-    this.handleMessages(chat)
-    await this._$emit()
+    this.inputValue = targetMessage.ask
+    await this.handleChat()
   }
 
   async handleChatStop(id:any) {
@@ -198,8 +146,10 @@ class Chat extends client {
   }
 
   resetField() {
-    this.inputValue = ''
-    this.changeField()
+    if (this.inputValue !== '') {
+      this.inputValue = ''
+      this.changeField()
+    }
   }
 
   changeField() {
@@ -215,9 +165,6 @@ class Chat extends client {
   }
 
   destroy() {
-    for (let i = 0, len = this.events.length; i < len; i++) {
-      window.removeEventListener(this.events[i], this.handleEvent)
-    }
     if (this.field) {
       this.field.removeEventListener('input', () => {
       })
