@@ -1,8 +1,7 @@
 import Chat from './App'
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react'
 import { message } from 'antd'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import { Markdown } from './markdown'
 
 function getDate() {
   const now = new Date()
@@ -70,8 +69,8 @@ const ChatComponent = (props:any, ref:any) => {
       <div
         className='chat-wrapper flex-1 overflow-y-auto p-4 text-sm leading-6 text-slate-900 sm:text-base sm:leading-7'
       >
-        {chatMessages.map((item) => (
-          <div key={item.id} className='w-full flex mb-4'>
+        {chatMessages.map((message) => (
+          <div key={message.id} className='w-full flex mb-4'>
             <div className='flex-shrink-0 flex flex-col relative items-end mr-2'>
               <img
                 className='rounded-full w-8 h-8'
@@ -80,22 +79,20 @@ const ChatComponent = (props:any, ref:any) => {
               />
             </div>
             <div className='relative flex w-full min-w-0 flex-col'>
-              <div className={`${item.role === 'user' ? '' : 'border-radius--prompt px-2 py-4 bg-white sm:px-4'}`}>
-                <ReactMarkdown
-                  className='whitespace-pre-wrap text-sm  relative'
-                  remarkPlugins={[remarkGfm]}
-                >
-                  {item.content}
-                </ReactMarkdown>
-                {item.loading && <span className='typing'></span>}
+              <div className={`${message.role === 'user' ? '' : 'border-radius--prompt px-2 py-4 bg-white sm:px-4'}`}>
+                <Markdown
+                  content={message.content}
+                />
+
+                {message.loading && <span className='typing'></span>}
                 {
-                  item.role === 'assistant'
-                    ? item.loading
+                  message.role === 'assistant'
+                    ? message.loading
                       ? <div>
                         <div className='mt-4 flex align-middle'>
                           <div
                             className='mr-6 cursor-pointer text-xs items-center text-color--Primayblue_01'
-                            onClick={() => handleChatStop(item)}
+                            onClick={() => handleChatStop(message)}
                           >
                             <i className='iconfont icon-NO-Outline mr-[4px]' />
                             停止生成
@@ -105,14 +102,14 @@ const ChatComponent = (props:any, ref:any) => {
                       : <div className='flex mt-4 align-middle'>
                         <div
                           className='mr-6 cursor-pointer text-xs items-center text-color--Primayblue_01'
-                          onClick={() => handleChatReload(item)}
+                          onClick={() => handleChatReload(message)}
                         >
                           <i className='iconfont icon-Refresh mr-[4px]' />
                             重新生成
                         </div>
                         <div
                           className='mr-6 cursor-pointer text-xs items-center text-color--Primayblue_01'
-                          onClick={() => handleCopy(item.content)}
+                          onClick={() => handleCopy(message.content)}
                         >
                           <i className='iconfont icon-Copy mr-[4px]' />
                           复制

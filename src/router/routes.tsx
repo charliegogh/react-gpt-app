@@ -14,7 +14,7 @@ export const constantRoutes = [
   {
     path: '/',
     name: '/',
-    element: load(Home)
+    element: load(Chat)
   },
   {
     path: '/log',

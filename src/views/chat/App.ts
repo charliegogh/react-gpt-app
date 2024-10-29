@@ -22,7 +22,8 @@ class Chat extends client {
   constructor(options: any) {
     super()
     this.currentChatMessageId = '1'
-    this.chatMessages = []
+    this.chatMessages = [
+    ]
     this.chatSession = []
 
     this.$onCallback = this._$on
